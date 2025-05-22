@@ -8,11 +8,11 @@ For legal reasons, this repo has no copyrighted sounds, but you may use the "exa
 ## 2. How to use
 Since Undertale voices are made of multiple samples, each character voice has to be sorted into its own folder, for example
 
-📁Undertale Talker Folder
-	├──UndertaleTalker.exe
-	├──📁Character_1
-		├──Voice_1.wav
-		└──Voice_2.wav
+📁Undertale Talker Folder<br/>
+	├──UndertaleTalker.exe<br/>
+	├──📁Character_1<br/>
+		├──Voice_1.wav<br/>
+		└──Voice_2.wav<br/>
 	└──📁Character_2
 		├──Voice_1.wav
 		└──Voice_2.wav
