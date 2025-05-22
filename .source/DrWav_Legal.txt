@@ -1,0 +1,6 @@
+libltfat - Large Time-Frequency Analysis Toolbox Library
+Copyright (C) 2004 - 2018  Peter L. Søndergaard
+Copyright (C) 2013 - 2018  Zdeněk Průša
+Licensed under GPL v3 - https://opensource.org/license/gpl-3-0
+
+Dr_wav is a par of the Libflat library: https://github.com/ltfat/libltfat
