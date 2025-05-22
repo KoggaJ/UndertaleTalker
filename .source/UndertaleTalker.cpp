@@ -38,7 +38,6 @@ std::vector<Sample> pitch_shift(const std::vector<Sample>& input, float pitchFac
     return output;
 }
 
-// Sanitize input to be a safe filename
 std::string sanitize_filename(const std::string& input) {
     std::string name = input.substr(0, 30);
     for (char& c : name) {
@@ -60,11 +59,21 @@ int main() {
         return 1;
     }
 
+    std::string voiceFolder;
+    std::cout << "Enter voice folder name: ";
+    std::getline(std::cin, voiceFolder);
+
+    if (!fs::exists(voiceFolder) || !fs::is_directory(voiceFolder)) {
+        std::cerr << "Folder not found: " << voiceFolder << "\n";
+        getch();
+        return 1;
+    }
+
     std::string filename = sanitize_filename(userInput);
 
     std::vector<VoiceSample> voiceVariants;
 
-    for (const auto& entry : fs::directory_iterator("voices")) {
+    for (const auto& entry : fs::directory_iterator(voiceFolder)) {
         if (!entry.is_regular_file() || entry.path().extension() != ".wav")
             continue;
 
@@ -88,7 +97,7 @@ int main() {
     }
 
     if (voiceVariants.empty()) {
-        std::cerr << "No usable WAV files found in ./voices/\n";
+        std::cerr << "No usable WAV files found in " << voiceFolder << "\n";
         getch();
         return 1;
     }
@@ -155,6 +164,6 @@ int main() {
     drwav_write_pcm_frames(&outWav, outputBuffer.size(), outputBuffer.data());
     drwav_uninit(&outWav);
 
-    std::cout << filename << " generated with " << maxWritePos << " samples.\n";
+    std::cout << "Generated: " << filename << " (" << maxWritePos << " samples)\n";
     return 0;
 }
