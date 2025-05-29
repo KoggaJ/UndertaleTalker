@@ -104,8 +104,8 @@ int main() {
 
     const float delayBetweenChars = 0.05f;
     const float delayForSilence = 0.3f;
-    const float minPitch = 0.9f;
-    const float maxPitch = 1.1f;
+    const float minPitch = 1.0f;
+    const float maxPitch = 1.0f;
 
     std::default_random_engine rng(std::random_device{}());
     std::uniform_real_distribution<float> pitchDist(minPitch, maxPitch);
