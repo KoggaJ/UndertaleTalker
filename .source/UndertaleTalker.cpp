@@ -12,9 +12,9 @@
 
 namespace fs = std::filesystem;
 
-#define SAMPLE_RATE 44100
-#define BITS_PER_SAMPLE 16
-#define CHANNELS 1
+//#define SAMPLE_RATE 44100
+//#define BITS_PER_SAMPLE 16
+//#define CHANNELS 1
 
 using Sample = int16_t;
 
@@ -72,6 +72,8 @@ int main() {
     std::string filename = sanitize_filename(userInput);
 
     std::vector<VoiceSample> voiceVariants;
+    drwav_data_format baseFormat = {};
+    bool formatInitialized = false;
 
     for (const auto& entry : fs::directory_iterator(voiceFolder)) {
         if (!entry.is_regular_file() || entry.path().extension() != ".wav")
@@ -83,13 +85,25 @@ int main() {
             continue;
         }
 
-        if (wav.channels != 1 || wav.sampleRate != SAMPLE_RATE || wav.bitsPerSample != BITS_PER_SAMPLE) {
-            std::cerr << "Skipping " << entry.path().filename() << " (must be 16-bit mono 44100 Hz)\n";
-            drwav_uninit(&wav);
-            continue;
+        if (!formatInitialized) {
+            baseFormat.container = drwav_container_riff;
+            baseFormat.format = DR_WAVE_FORMAT_PCM;
+            baseFormat.channels = wav.channels;
+            baseFormat.sampleRate = wav.sampleRate;
+            baseFormat.bitsPerSample = wav.bitsPerSample;
+            formatInitialized = true;
+        } else {
+            if (wav.channels != baseFormat.channels ||
+                wav.sampleRate != baseFormat.sampleRate ||
+                wav.bitsPerSample != baseFormat.bitsPerSample) {
+                std::cerr << "Skipping " << entry.path().filename()
+                          << " (format mismatch)\n";
+                drwav_uninit(&wav);
+                continue;
+            }
         }
 
-        std::vector<Sample> data(wav.totalPCMFrameCount);
+        std::vector<Sample> data(wav.totalPCMFrameCount * wav.channels);
         drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, data.data());
         drwav_uninit(&wav);
 
@@ -110,8 +124,11 @@ int main() {
     std::default_random_engine rng(std::random_device{}());
     std::uniform_real_distribution<float> pitchDist(minPitch, maxPitch);
 
+    uint32_t sampleRate = baseFormat.sampleRate;
+    uint16_t channels = baseFormat.channels;
+
     std::vector<Sample> outputBuffer;
-    outputBuffer.resize(static_cast<size_t>(userInput.length() * 2.0f * SAMPLE_RATE), 0);
+    outputBuffer.resize(static_cast<size_t>(userInput.length() * 2.0f * sampleRate * channels), 0);
 
     float currentTime = 0.0f;
     size_t maxWritePos = 0;
@@ -126,11 +143,11 @@ int main() {
         const auto& selectedVoice = voiceVariants[rng() % voiceVariants.size()];
         auto shifted = pitch_shift(selectedVoice.data, pitch);
 
-        size_t startSample = static_cast<size_t>(currentTime * SAMPLE_RATE);
+        size_t startSample = static_cast<size_t>(currentTime * sampleRate) * channels;
         size_t endSample = startSample + shifted.size();
 
         if (endSample > outputBuffer.size()) {
-            outputBuffer.resize(endSample + SAMPLE_RATE, 0);
+            outputBuffer.resize(endSample + sampleRate * channels, 0);
         }
 
         for (size_t i = 0; i < shifted.size(); ++i) {
@@ -147,21 +164,14 @@ int main() {
 
     outputBuffer.resize(maxWritePos);
 
-    drwav_data_format format;
-    format.container = drwav_container_riff;
-    format.format = DR_WAVE_FORMAT_PCM;
-    format.channels = CHANNELS;
-    format.sampleRate = SAMPLE_RATE;
-    format.bitsPerSample = BITS_PER_SAMPLE;
-
     drwav outWav;
-    if (!drwav_init_file_write(&outWav, filename.c_str(), &format, nullptr)) {
+    if (!drwav_init_file_write(&outWav, filename.c_str(), &baseFormat, nullptr)) {
         std::cerr << "Failed to create " << filename << "\n";
         getch();
         return 1;
     }
 
-    drwav_write_pcm_frames(&outWav, outputBuffer.size(), outputBuffer.data());
+    drwav_write_pcm_frames(&outWav, outputBuffer.size() / channels, outputBuffer.data());
     drwav_uninit(&outWav);
 
     std::cout << "Generated: " << filename << " (" << maxWritePos << " samples)\n";
