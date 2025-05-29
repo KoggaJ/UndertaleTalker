@@ -1,3 +1,6 @@
+//Compilation command:
+//g++ -static-libstdc++ -o UndertaleTalker UndertaleTalker.cpp
+
 #include <iostream>
 #include <conio.h>
 #include <vector>
@@ -11,10 +14,6 @@
 #include "dr_wav.h"
 
 namespace fs = std::filesystem;
-
-//#define SAMPLE_RATE 44100
-//#define BITS_PER_SAMPLE 16
-//#define CHANNELS 1
 
 using Sample = int16_t;
 
