@@ -17,7 +17,7 @@ Since Undertale voices are made of multiple samples, each character voice has to
 ├──────🔊Voice_1.wav<br/>
 └──────🔊Voice_2.wav<br/>
 
-Keep in mind, all the audio files have to be in **mono**, as well as **44100 sample rate**. if the audio is structured differently, the program might refuse to accept it or have otherwise unexpected behavior.
+Keep in mind, all the audio files have to be in **mono**, as well use **the same sample rate**. if the audio is structured differently, the program might refuse to accept it or have otherwise unexpected behavior.
 
 After setting up the EXE and the character folders, run the EXE file. You will be prompted to enter your text. This is where the character voice will go. Each letter in your input will be converted to a sound, so if you enter "I like toast", the audio will play once, then pause, then play 4 times, then pause again, before playing 5 times and generating the file. Spaces, comas and periods will be treated as pauses. You can stack multiple of them together for a longer pause.
 

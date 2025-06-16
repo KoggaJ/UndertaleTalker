@@ -1,5 +1,5 @@
 //Compilation command:
-//g++ -static-libstdc++ -o UndertaleTalker UndertaleTalker.cpp
+//g++ UndertaleTalker.cpp -o UndertaleTalker.exe -static -std=c++17
 
 #include <iostream>
 #include <conio.h>
@@ -116,7 +116,7 @@ int main() {
     }
 
     const float delayBetweenChars = 0.05f;
-    const float delayForSilence = 0.3f;
+    const float delayForSilence = 0.05f;
     const float minPitch = 1.0f;
     const float maxPitch = 1.0f;
 
